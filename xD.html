@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .tab {
+      overflow: hidden;
+      background-color: #f1f1f1;
+    }
+
+    .tab button {
+      background-color: #ddd;
+      color: #333;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 10px 20px;
+      margin-right: 5px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .tab button:hover {
+      background-color: #bbb;
+    }
+
+    .tab button.active {
+      background-color: #ccc;
+    }
+
+    .tabcontent {
+      display: none;
+      padding: 20px;
+      border-top: none;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    li button {
+      background-color: #ff6347;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      float: right;
+      transition: background-color 0.3s ease;
+    }
+
+    li button:hover {
+      background-color: #e74c3c;
+    }
+
+    .cantidad {
+      width: 50px;
+      margin-right: 10px;
+      text-align: center;
+    }
+
+    .formulario {
+      margin-bottom: 10px;
+    }
+
+    .formulario input[type="text"],
+    .formulario input[type="number"],
+    .formulario input[type="file"],
+    .formulario select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tienda</h1>
+
+  <!-- Pestañas -->
+  <div class="tab">
+    <button onclick="openTab(event, 'productos')" class="tablinks">Productos</button>
+    <button onclick="openTab(event, 'carrito')" class="tablinks">Carrito</button>
+    <button onclick="openTab(event, 'editar')" class="tablinks">Editar</button>
+    <button onclick="openTab(event, 'pollo')" class="tablinks">Pollo</button>
+  </div>
+
+  <!-- Contenido de las pestañas -->
+  <div id="productos" class="tabcontent">
+    <h2>Productos</h2>
+    <div id="lista-secciones">
+      <!-- Aquí se agregarán las secciones dinámicamente -->
+    </div>
+  </div>
+
+  <div id="carrito" class="tabcontent">
+    <h2>Carrito</h2>
+    <ul id="lista-carrito">
+      <!-- Aquí se agregarán los productos seleccionados -->
+    </ul>
+    <p>Total: <span id="total"></span></p>
+  </div>
+
+  <div id="editar" class="tabcontent">
+    <h2>Editar</h2>
+    <div class="formulario">
+      <label for="nuevo-producto-nombre">Nombre:</label>
+      <input type="text" id="nuevo-producto-nombre" placeholder="Nombre del nuevo producto">
+    </div>
+    <div class="formulario">
+      <label for="nuevo-producto-precio">Precio:</label>
+      <input type="number" id="nuevo-producto-precio" placeholder="Precio del nuevo producto">
+    </div>
+    <div class="formulario">
+      <label for="nuevo-producto-imagen">Imagen:</label>
+      <input type="file" id="nuevo-producto-imagen" accept="image/*">
+    </div>
+    <div class="formulario">
+      <label for="nuevo-producto-seccion">Sección:</label>
+      <select id="nuevo-producto-seccion">
+        <!-- Las opciones de sección se agregarán dinámicamente -->
+      </select>
+    </div>
+    <button onclick="agregarNuevoProducto()" style="margin-top: 10px;">Agregar Producto</button>
+    <hr>
+    <h3>Editar secciones</h3>
+    <div>
+      <label for="nueva-seccion-nombre">Nombre de la nueva sección:</label>
+      <input type="text" id="nueva-seccion-nombre" placeholder="Nombre de la nueva sección">
+    </div>
+    <button onclick="agregarNuevaSeccion()" style="margin-top: 10px;">Agregar Sección</button>
+  </div>
+
+  <div id="pollo" class="tabcontent">
+    <h2>Pollo</h2>
+    <ul id="lista-productos-pollo">
+      <!-- Aquí se agregarán los productos de pollo dinámicamente -->
+    </ul>
+  </div>
+
+  <script>
+    var secciones = [];
+    var carrito = [];
+
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+
+      if (tabName === 'productos') {
+        mostrarProductos();
+      } else if (tabName === 'editar') {
+        mostrarSeccionesEditar();
+      } else if (tabName === 'carrito') {
+        calcularTotalCarrito();
+      } else if (tabName === 'pollo') {
+        mostrarProductosPollo();
+      }
+    }
+
+    function mostrarSeccionesEditar() {
+      var selectSeccion = document.getElementById('nuevo-producto-seccion');
+      selectSeccion.innerHTML = '';
+      secciones.forEach(function(seccion) {
+        var option = document.createElement('option');
+        option.value = seccion.nombre;
+        option.textContent = seccion.nombre;
+        selectSeccion.appendChild(option);
+      });
+    }
+
+    function agregarNuevaSeccion() {
+      var nuevaSeccionNombre = document.getElementById('nueva-seccion-nombre').value;
+      var nuevaSeccion = {
+        nombre: nuevaSeccionNombre,
+        productos: []
+      };
+      secciones.push(nuevaSeccion);
+      mostrarProductos();
+    }
+
+    function agregarNuevoProducto() {
+      var nuevoProductoNombre = document.getElementById('nuevo-producto-nombre').value;
+      var nuevoProductoPrecio = parseFloat(document.getElementById('nuevo-producto-precio').value);
+      var nuevaSeccionNombre = document.getElementById('nuevo-producto-seccion').value;
+      var nuevaImagen = document.getElementById('nuevo-producto-imagen').files[0];
+
+      if (!isNaN(nuevoProductoPrecio) && nuevoProductoNombre && nuevaSeccionNombre && nuevaImagen) {
+        var seccion = secciones.find(function(s) {
+          return s.nombre === nuevaSeccionNombre;
+        });
+        if (seccion) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var nuevoProducto = {
+              nombre: nuevoProductoNombre,
+              precio: nuevoProductoPrecio,
+              imagen: e.target.result
+            };
+            seccion.productos.push(nuevoProducto);
+            mostrarProductos();
+          };
+          reader.readAsDataURL(nuevaImagen);
+        } else {
+          alert('La sección especificada no existe.');
+        }
+      } else {
+        alert('Por favor, complete todos los campos correctamente.');
+      }
+    }
+
+    function agregarAlCarritoDesdeProductos(nombreProducto) {
+      var producto = null;
+      secciones.forEach(function(seccion) {
+        var encontrado = seccion.productos.find(function(producto) {
+          return producto.nombre === nombreProducto;
+        });
+        if (encontrado) {
+          producto = encontrado;
+        }
+      });
+      if (producto) {
+        agregarAlCarrito(producto, 1);
+      }
+    }
+
+    function agregarAlCarrito(producto, cantidad) {
+      var itemExistente = carrito.find(item => item.producto.nombre === producto.nombre);
+      if (itemExistente) {
+        itemExistente.cantidad += cantidad;
+      } else {
+        carrito.push({ producto: producto, cantidad: cantidad });
+      }
+      mostrarCarrito();
+    }
+
+    function quitarDelCarrito(index) {
+      carrito.splice(index, 1);
+      mostrarCarrito();
+    }
+
+    function mostrarCarrito() {
+      var listaCarrito = document.getElementById('lista-carrito');
+      listaCarrito.innerHTML = '';
+      carrito.forEach(function(item, index) {
+        var li = document.createElement('li');
+        var cantidad = item.cantidad;
+        var producto = item.producto;
+        li.textContent = `${cantidad}x ${producto.nombre} - $${producto.precio * cantidad}`;
+        var botonEliminar = document.createElement('button');
+        botonEliminar.textContent = 'Eliminar';
+        botonEliminar.addEventListener('click', function() {
+          quitarDelCarrito(index);
+        });
+        li.appendChild(botonEliminar);
+        listaCarrito.appendChild(li);
+      });
+      calcularTotalCarrito();
+    }
+
+    function calcularTotalCarrito() {
+      var total = 0;
+      carrito.forEach(function(item) {
+        total += item.producto.precio * item.cantidad;
+      });
+      document.getElementById('total').textContent = '$' + total.toFixed(2);
+    }
+
+    function mostrarProductos() {
+      var listaSecciones = document.getElementById('lista-secciones');
+      listaSecciones.innerHTML = '';
+      secciones.forEach(function(seccion) {
+        var divSeccion = document.createElement('div');
+        divSeccion.innerHTML = '<h3>' + seccion.nombre + '</h3><ul id="lista-' + seccion.nombre.toLowerCase() + '"></ul>';
+        listaSecciones.appendChild(divSeccion);
+        mostrarProductosPorSeccion(seccion);
+      });
+    }
+
+
+    function editarProducto(producto) {
+      var nuevoNombre = prompt('Ingrese el nuevo nombre del producto:', producto.nombre);
+      if (nuevoNombre === null || nuevoNombre === '') {
+        return; // Si el usuario cancela o no proporciona un nombre, no se realiza ninguna acción
+      }
+      var nuevoPrecio = parseFloat(prompt('Ingrese el nuevo precio del producto:', producto.precio));
+      if (isNaN(nuevoPrecio)) {
+        alert('Por favor, ingrese un precio válido.');
+        return;
+      }
+      producto.nombre = nuevoNombre;
+      producto.precio = nuevoPrecio;
+      mostrarProductosPollo();
+    
+    }
+
+    
+    function mostrarProductosPollo() {
+      var listaProductosPollo = document.getElementById('lista-productos-pollo');
+      listaProductosPollo.innerHTML = '';
+      secciones.forEach(function(seccion) {
+        seccion.productos.forEach(function(producto) {
+          var li = document.createElement('li');
+          li.textContent = producto.nombre + ' - $' + producto.precio;
+          var imagen = document.createElement('img');
+          imagen.src = producto.imagen;
+          imagen.alt = producto.nombre;
+          imagen.style.width = '50px'; // Ajusta el tamaño de la imagen según sea necesario
+          li.appendChild(imagen);
+          var botonEditar = document.createElement('button');
+          botonEditar.textContent = 'Editar';
+          botonEditar.addEventListener('click', function() {
+            editarProducto(producto);
+          });
+          li.appendChild(botonEditar);
+          listaProductosPollo.appendChild(li);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>

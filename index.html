@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño</title>
+    <link rel="stylesheet" href="styles_inicio_sesion.css">
+</head>
+<body>
+    <div class="formulario">
+        <h1>INICIO DE SESION</h1>
+        <form method="post" action="inicio.html">
+            <div class="username">
+                <input type="text" required>
+                <label>Nombre de usuario</label>
+            </div>
+            <div class="username">
+                <input type="password" id="input" required>
+                <label>Contraseña</label>
+                <img src="imagenes/ojo.png" alt="" class="icon" id="ojo">
+            </div>
+
+            <a href="olvido_contraseña.html" class="recordar">
+                ¿Olvidó su contraseña?
+            </a>
+            <button type="submit" class="buttom">Iniciar sesión</button>
+        </form>
+    </div>
+    <script src="mostrar.js"></script>
+</body>
+</html>
